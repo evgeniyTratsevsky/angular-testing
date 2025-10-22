@@ -6,8 +6,10 @@ import { TodoListComponent } from './components/todo-list/todo-list.component';
   selector: 'app-root',
   imports: [RouterOutlet, TodoListComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.less'
+  styleUrl: './app.component.less',
 })
 export class AppComponent {
   title = 'angular-testing';
+  a: number = 1;
+  b: number = 2;
 }

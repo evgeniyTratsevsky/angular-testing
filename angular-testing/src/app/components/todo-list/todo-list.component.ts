@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { TodoService } from '../../services/todo.service';
 import { Todo, TodoStats } from '../../models/todo.model';
 import { Observable } from 'rxjs';
+import { TodoFilterPipe } from '../../pipes/todo-filter.pipe';
 
 @Component({
   selector: 'app-todo-list',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TodoFilterPipe],
   templateUrl: './todo-list.component.html',
   styleUrl: './todo-list.component.less'
 })
@@ -19,6 +20,7 @@ export class TodoListComponent implements OnInit {
   editingTitle = '';
   isLoading = false;
   errorMessage = '';
+  currentFilter: 'all' | 'completed' | 'pending' = 'all';
 
   constructor(private todoService: TodoService) {}
 
@@ -100,6 +102,10 @@ export class TodoListComponent implements OnInit {
 
   trackByTodoId(index: number, todo: Todo): number {
     return todo.id;
+  }
+
+  setFilter(filter: 'all' | 'completed' | 'pending'): void {
+    this.currentFilter = filter;
   }
 }
 

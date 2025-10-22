@@ -47,7 +47,7 @@ npm run test:coverage
 - Form validation and error handling
 - Beautiful, modern UI
 
-### Test Coverage (109 Tests Total)
+### Test Coverage (157 Tests Total) ⭐
 
 #### 1. **Service Tests** (`todo.service.spec.ts`)
 - ✅ 15 unit tests
@@ -76,7 +76,14 @@ npm run test:coverage
 - Edge cases and XSS protection
 - ARIA attributes for accessibility
 
-#### 4. **App Component Tests** (`app.component.spec.ts`)
+#### 4. **Pipe Tests** ⭐ NEW
+- ✅ 48 pipe tests (TodoFilterPipe + DateAgoPipe)
+- Pure function testing
+- Edge cases and input formats
+- Pluralization logic
+- Data immutability
+
+#### 5. **App Component Tests** (`app.component.spec.ts`)
 - ✅ 3 app tests
 - Basic app initialization
 - Component integration
@@ -99,6 +106,11 @@ src/app/
 ├── services/
 │   ├── todo.service.ts                    # Business logic service
 │   └── todo.service.spec.ts               # Service unit tests ✅ (15 tests)
+├── pipes/                                 # ⭐ NEW
+│   ├── todo-filter.pipe.ts                # Filter pipe
+│   ├── todo-filter.pipe.spec.ts           # Filter tests ✅ (18 tests)
+│   ├── date-ago.pipe.ts                   # Date formatting pipe
+│   └── date-ago.pipe.spec.ts              # Date tests ✅ (30 tests)
 ├── components/
 │   ├── todo-list/
 │   │   ├── todo-list.component.ts         # List component logic
@@ -113,10 +125,14 @@ src/app/
 ├── app.component.ts                       # Root component
 └── app.component.spec.ts                  # Root tests ✅ (3 tests)
 
-docs/testing-examples/                     # 📚 Testing guides
-├── INPUT_OUTPUT_TESTING.md                # @Input/@Output examples
-├── RENDERING_TESTS.md                     # Rendering test examples
-└── README.md                              # Examples index
+docs/
+├── testing-examples/                      # 📚 Testing guides
+│   ├── INPUT_OUTPUT_TESTING.md            # @Input/@Output examples
+│   ├── RENDERING_TESTS.md                 # Rendering test examples
+│   ├── PIPE_TESTING.md                    # Pipe testing examples ⭐ NEW
+│   └── README.md                          # Examples index
+├── KARMA_GUIDE.md                         # Karma test runner guide
+└── CHANGELOG.md                           # Change log
 ```
 
 ## 🎓 Testing Patterns Demonstrated

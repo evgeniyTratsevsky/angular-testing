@@ -42,7 +42,6 @@ describe('AppComponent', () => {
     fixture.detectChanges(); // Запускаем обнаружение изменений
     const compiled = fixture.nativeElement as HTMLElement;
 
-    // Ищем элемент app-todo-list в DOM
     expect(compiled.querySelector('app-todo-list')).toBeTruthy();
   });
 });

@@ -45,9 +45,37 @@
     </div>
   }
 
+  <!-- Filter Buttons -->
+  <div class="filter-buttons" data-testid="filter-buttons">
+    <button
+      (click)="setFilter('all')"
+      [class.active]="currentFilter === 'all'"
+      class="btn btn-filter"
+      data-testid="filter-all"
+    >
+      All ({{ stats.total }})
+    </button>
+    <button
+      (click)="setFilter('pending')"
+      [class.active]="currentFilter === 'pending'"
+      class="btn btn-filter"
+      data-testid="filter-pending"
+    >
+      ⏳ Pending ({{ stats.pending }})
+    </button>
+    <button
+      (click)="setFilter('completed')"
+      [class.active]="currentFilter === 'completed'"
+      class="btn btn-filter"
+      data-testid="filter-completed"
+    >
+      ✅ Completed ({{ stats.completed }})
+    </button>
+  </div>
+
   <!-- Todos List -->
   <ul class="todo-list" data-testid="todo-list">
-    @for (todo of todos$ | async; track trackByTodoId($index, todo)) {
+    @for (todo of ((todos$ | async) ?? []) | todoFilter:currentFilter; track trackByTodoId($index, todo)) {
       <li class="todo-item" [class.completed]="todo.completed" [attr.data-testid]="'todo-item-' + todo.id">
         @if (editingTodoId === todo.id) {
           <!-- Edit Mode -->
