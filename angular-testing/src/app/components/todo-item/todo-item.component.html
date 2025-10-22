@@ -1,0 +1,79 @@
+<div
+  [ngClass]="getItemClasses()"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  data-testid="todo-item"
+  [attr.data-todo-id]="todo.id"
+>
+  <div class="todo-content">
+    <!-- Checkbox для переключения статуса -->
+    <input
+      type="checkbox"
+      [checked]="todo.completed"
+      (change)="onToggle()"
+      class="todo-checkbox"
+      [attr.data-testid]="'checkbox-' + todo.id"
+      [attr.aria-label]="'Отметить задачу: ' + todo.title"
+    />
+
+    <!-- Заголовок задачи -->
+    <div class="todo-info">
+      <h3
+        class="todo-title"
+        [attr.data-testid]="'title-' + todo.id"
+      >
+        {{ todo.title }}
+      </h3>
+
+      <!-- Информация о статусе -->
+      <span
+        class="todo-status"
+        [attr.data-testid]="'status-' + todo.id"
+      >
+        {{ getStatusText() }}
+      </span>
+
+      <!-- Дата создания -->
+      <span
+        class="todo-date"
+        [attr.data-testid]="'date-' + todo.id"
+      >
+        {{ getFormattedDate() }}
+      </span>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="todo-actions">
+      @if (canEdit) {
+        <button
+          class="btn-edit"
+          (click)="onEdit()"
+          [attr.data-testid]="'edit-btn-' + todo.id"
+          aria-label="Редактировать"
+        >
+          ✏️ Редактировать
+        </button>
+      }
+
+      <button
+        class="btn-delete"
+        (click)="onDelete()"
+        [attr.data-testid]="'delete-btn-' + todo.id"
+        aria-label="Удалить"
+      >
+        🗑️ Удалить
+      </button>
+    </div>
+  </div>
+
+  <!-- Индикатор выделения -->
+  @if (isHighlighted) {
+    <div
+      class="highlight-indicator"
+      data-testid="highlight-indicator"
+    >
+      ⭐ Выделено
+    </div>
+  }
+</div>
+

@@ -1,0 +1,129 @@
+<div class="todo-container">
+  <h1>Todo List with Testing</h1>
+
+  <!-- Stats Section -->
+  <div class="stats" data-testid="stats">
+    <div class="stat-item">
+      <span class="stat-label">Total:</span>
+      <span class="stat-value" data-testid="total-count">{{ stats.total }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Completed:</span>
+      <span class="stat-value" data-testid="completed-count">{{ stats.completed }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Pending:</span>
+      <span class="stat-value" data-testid="pending-count">{{ stats.pending }}</span>
+    </div>
+  </div>
+
+  <!-- Add Todo Form -->
+  <div class="add-todo-form">
+    <input
+      type="text"
+      [(ngModel)]="newTodoTitle"
+      (keyup.enter)="addTodo()"
+      placeholder="Enter a new todo..."
+      class="todo-input"
+      data-testid="todo-input"
+      [disabled]="isLoading"
+    />
+    <button
+      (click)="addTodo()"
+      class="btn btn-primary"
+      data-testid="add-button"
+      [disabled]="isLoading"
+    >
+      {{ isLoading ? 'Adding...' : 'Add' }}
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  @if (errorMessage) {
+    <div class="error-message" data-testid="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- Todos List -->
+  <ul class="todo-list" data-testid="todo-list">
+    @for (todo of todos$ | async; track trackByTodoId($index, todo)) {
+      <li class="todo-item" [class.completed]="todo.completed" [attr.data-testid]="'todo-item-' + todo.id">
+        @if (editingTodoId === todo.id) {
+          <!-- Edit Mode -->
+          <div class="edit-mode">
+            <input
+              type="text"
+              [(ngModel)]="editingTitle"
+              (keyup.enter)="saveEdit(todo.id)"
+              (keyup.escape)="cancelEdit()"
+              class="edit-input"
+              [attr.data-testid]="'edit-input-' + todo.id"
+              autofocus
+            />
+            <button
+              (click)="saveEdit(todo.id)"
+              class="btn btn-sm btn-success"
+              [attr.data-testid]="'save-button-' + todo.id"
+            >
+              Save
+            </button>
+            <button
+              (click)="cancelEdit()"
+              class="btn btn-sm btn-secondary"
+              data-testid="cancel-edit-button"
+            >
+              Cancel
+            </button>
+          </div>
+        } @else {
+          <!-- View Mode -->
+          <div class="view-mode">
+            <input
+              type="checkbox"
+              [checked]="todo.completed"
+              (change)="toggleTodo(todo.id)"
+              class="todo-checkbox"
+              [attr.data-testid]="'toggle-' + todo.id"
+            />
+            <span class="todo-title" [attr.data-testid]="'title-' + todo.id">
+              {{ todo.title }}
+            </span>
+            <div class="todo-actions">
+              <button
+                (click)="startEdit(todo)"
+                class="btn btn-sm btn-edit"
+                [attr.data-testid]="'edit-button-' + todo.id"
+              >
+                Edit
+              </button>
+              <button
+                (click)="deleteTodo(todo.id)"
+                class="btn btn-sm btn-danger"
+                [attr.data-testid]="'delete-button-' + todo.id"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        }
+      </li>
+    } @empty {
+      <li class="empty-state" data-testid="empty-state">
+        No todos yet. Add one above!
+      </li>
+    }
+  </ul>
+
+  <!-- Clear Completed Button -->
+  @if (stats.completed > 0) {
+    <button
+      (click)="clearCompleted()"
+      class="btn btn-warning clear-completed"
+      data-testid="clear-completed-button"
+    >
+      Clear Completed ({{ stats.completed }})
+    </button>
+  }
+</div>
+
