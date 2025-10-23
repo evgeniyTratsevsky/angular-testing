@@ -49,7 +49,8 @@ describe('Spy Methods Examples - Примеры методов spy', () => {
       todoService.addTodo('Третья задача');
 
       // Получаем массив всех аргументов всех вызовов
-      const allArgs = todoService.addTodo.calls.args();
+      const allCalls = todoService.addTodo.calls.all();
+      const allArgs = allCalls.map((call: any) => call.args);
 
       // Проверяем структуру: массив массивов аргументов
       expect(allArgs).toEqual([
@@ -71,7 +72,8 @@ describe('Spy Methods Examples - Примеры методов spy', () => {
       apiService.request('DELETE', '/todos/1');
 
       // Получаем все аргументы
-      const allArgs = apiService.request.calls.args();
+      const allCalls = apiService.request.calls.all();
+      const allArgs = allCalls.map((call: any) => call.args);
 
       // Проверяем что каждый вызов сохранил все свои аргументы
       expect(allArgs[0]).toEqual(['GET', '/users', { page: 1 }]);
@@ -408,7 +410,7 @@ describe('Spy Methods Examples - Примеры методов spy', () => {
       const processor = jasmine.createSpyObj('DataProcessor', ['normalize', 'validate']);
 
       // normalize просто возвращает данные как есть
-      processor.normalize.and.identity();
+      processor.normalize.and.callFake((x: any) => x);
 
       // validate проверяет данные и возвращает boolean
       processor.validate.and.returnValue(true);
@@ -588,7 +590,7 @@ describe('Spy Methods Examples - Примеры методов spy', () => {
 
       // Настраиваем цепочку операций
       workflowService.start.and.returnValue('started');
-      workflowService.process.and.identity();
+      workflowService.process.and.callFake((x: any) => x);
       workflowService.validate.and.returnValue(true);
       workflowService.complete.and.returnValue({ status: 'success' });
 

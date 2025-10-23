@@ -212,14 +212,17 @@ it('должен отслеживать аргументы всех вызово
   service.saveData('второй', 2);
   service.saveData('третий', 3);
   
-  // Получить массив всех аргументов
-  expect(service.saveData.calls.args()).toEqual([
+  // Получить массив всех аргументов через calls.all()
+  const allCalls = service.saveData.calls.all();
+  const allArgs = allCalls.map(call => call.args);
+  
+  expect(allArgs).toEqual([
     ['первый', 1],
     ['второй', 2],
     ['третий', 3]
   ]);
   
-  // Получить аргументы конкретного вызова (индекс с 0)
+  // Альтернатива: получить аргументы конкретного вызова (индекс с 0)
   expect(service.saveData.calls.argsFor(0)).toEqual(['первый', 1]);
   expect(service.saveData.calls.argsFor(1)).toEqual(['второй', 2]);
 });
@@ -341,10 +344,19 @@ it('должен отслеживать несколько вызовов с р�
   // Проверяем количество вызовов
   expect(apiService.request.calls.count()).toBe(3);
   
-  // Проверяем аргументы каждого вызова
+  // Проверяем аргументы каждого вызова через argsFor()
   expect(apiService.request.calls.argsFor(0)).toEqual(['GET', '/users']);
   expect(apiService.request.calls.argsFor(1)).toEqual(['POST', '/users', { name: 'John' }]);
   expect(apiService.request.calls.argsFor(2)).toEqual(['GET', '/posts']);
+  
+  // Или через all() и map()
+  const allCalls = apiService.request.calls.all();
+  const allArgs = allCalls.map(call => call.args);
+  expect(allArgs).toEqual([
+    ['GET', '/users'],
+    ['POST', '/users', { name: 'John' }],
+    ['GET', '/posts']
+  ]);
   
   // Проверяем возвращаемые значения
   expect(result1).toEqual({ status: 200, data: 'first' });
@@ -352,8 +364,8 @@ it('должен отслеживать несколько вызовов с р�
   expect(result3).toEqual({ status: 200, data: 'third' });
   
   // Проверяем через calls.returnValue
-  expect(apiService.request.calls.all()[0].returnValue).toEqual({ status: 200, data: 'first' });
-  expect(apiService.request.calls.all()[1].returnValue).toEqual({ status: 201, data: 'second' });
+  expect(allCalls[0].returnValue).toEqual({ status: 200, data: 'first' });
+  expect(allCalls[1].returnValue).toEqual({ status: 201, data: 'second' });
 });
 ```
 
@@ -388,8 +400,10 @@ describe('TodoComponent с детальной проверкой spy', () => {
     expect(todoService.addTodo.calls.argsFor(0)).toEqual(['Task 1']);
     expect(todoService.addTodo.calls.argsFor(1)).toEqual(['Task 2']);
     
-    // Альтернативный способ через args()
-    expect(todoService.addTodo.calls.args()).toEqual([
+    // Альтернативный способ через all()
+    const allCalls = todoService.addTodo.calls.all();
+    const allArgs = allCalls.map(call => call.args);
+    expect(allArgs).toEqual([
       ['Task 1'],
       ['Task 2']
     ]);
