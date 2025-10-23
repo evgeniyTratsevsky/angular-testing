@@ -191,12 +191,224 @@ expect(array.length).toBeGreaterThan(0); // Сравнение
 ```
 
 ### Шпионы (Spies)
+
+#### Базовое использование
 ```typescript
 spyOn(object, 'method');                    // Создать шпиона на метод
 spyOn(object, 'method').and.returnValue(5); // Замокировать возвращаемое значение
 spyOn(object, 'method').and.callThrough(); // Вызвать оригинальный метод
 expect(spy).toHaveBeenCalled();             // Проверить вызов
 expect(spy).toHaveBeenCalledWith(arg);      // Проверить аргументы
+```
+
+#### Свойства spy для проверки вызовов
+
+**spy.calls.args** - получить массив всех аргументов всех вызовов:
+```typescript
+it('должен отслеживать аргументы всех вызовов', () => {
+  const service = jasmine.createSpyObj('DataService', ['saveData']);
+  
+  service.saveData('первый', 1);
+  service.saveData('второй', 2);
+  service.saveData('третий', 3);
+  
+  // Получить массив всех аргументов
+  expect(service.saveData.calls.args()).toEqual([
+    ['первый', 1],
+    ['второй', 2],
+    ['третий', 3]
+  ]);
+  
+  // Получить аргументы конкретного вызова (индекс с 0)
+  expect(service.saveData.calls.argsFor(0)).toEqual(['первый', 1]);
+  expect(service.saveData.calls.argsFor(1)).toEqual(['второй', 2]);
+});
+```
+
+**spy.calls.object** - получить контекст (this) при вызове:
+```typescript
+it('должен отслеживать контекст вызова', () => {
+  const myObject = {
+    name: 'Test Object',
+    method: function() { return this.name; }
+  };
+  
+  spyOn(myObject, 'method');
+  
+  myObject.method();
+  
+  // Проверить, что метод был вызван в контексте myObject
+  expect(myObject.method.calls.first().object).toBe(myObject);
+  expect(myObject.method.calls.mostRecent().object).toBe(myObject);
+});
+```
+
+**spy.calls.returnValue** - получить возвращаемое значение:
+```typescript
+it('должен отслеживать возвращаемые значения', () => {
+  const calculator = {
+    add: (a: number, b: number) => a + b
+  };
+  
+  spyOn(calculator, 'add').and.callThrough();
+  
+  calculator.add(2, 3);
+  calculator.add(5, 7);
+  
+  // Проверить возвращаемые значения
+  expect(calculator.add.calls.first().returnValue).toBe(5);
+  expect(calculator.add.calls.mostRecent().returnValue).toBe(12);
+  expect(calculator.add.calls.all()[0].returnValue).toBe(5);
+  expect(calculator.add.calls.all()[1].returnValue).toBe(12);
+});
+```
+
+#### Стратегии spy
+
+**and.stub()** - заглушка без действий (поведение по умолчанию):
+```typescript
+it('должен использовать заглушку без поведения', () => {
+  const service = jasmine.createSpyObj('UserService', ['getUser']);
+  
+  // По умолчанию spy уже работает как stub
+  // Но можно явно установить stub поведение
+  service.getUser.and.stub();
+  
+  const result = service.getUser(1);
+  
+  // Метод был вызван, но ничего не вернул
+  expect(service.getUser).toHaveBeenCalledWith(1);
+  expect(result).toBeUndefined();
+});
+
+it('должен сбросить spy обратно к stub', () => {
+  const service = jasmine.createSpyObj('NotificationService', ['notify']);
+  
+  // Сначала настроили возврат значения
+  service.notify.and.returnValue(true);
+  expect(service.notify('test')).toBe(true);
+  
+  // Затем сбросили обратно к stub
+  service.notify.and.stub();
+  expect(service.notify('test')).toBeUndefined();
+});
+```
+
+**and.identity()** - вернуть первый аргумент как есть:
+```typescript
+it('должен вернуть первый аргумент с помощью identity', () => {
+  const processor = jasmine.createSpyObj('DataProcessor', ['transform']);
+  
+  processor.transform.and.identity();
+  
+  const input = { id: 1, name: 'Test' };
+  const result = processor.transform(input);
+  
+  // Метод вернул первый аргумент без изменений
+  expect(result).toBe(input);
+  expect(processor.transform).toHaveBeenCalledWith(input);
+});
+
+it('должен работать с примитивами', () => {
+  const echo = jasmine.createSpy('echo').and.identity();
+  
+  expect(echo('hello')).toBe('hello');
+  expect(echo(42)).toBe(42);
+  expect(echo(true)).toBe(true);
+  
+  // Со множественными аргументами возвращается только первый
+  expect(echo('first', 'second', 'third')).toBe('first');
+});
+```
+
+#### Комплексный пример с несколькими вызовами
+```typescript
+it('должен отслеживать несколько вызовов с разными аргументами', () => {
+  const apiService = jasmine.createSpyObj('ApiService', ['request']);
+  
+  // Настраиваем разные ответы
+  apiService.request.and.returnValues(
+    { status: 200, data: 'first' },
+    { status: 201, data: 'second' },
+    { status: 200, data: 'third' }
+  );
+  
+  // Делаем вызовы
+  const result1 = apiService.request('GET', '/users');
+  const result2 = apiService.request('POST', '/users', { name: 'John' });
+  const result3 = apiService.request('GET', '/posts');
+  
+  // Проверяем количество вызовов
+  expect(apiService.request.calls.count()).toBe(3);
+  
+  // Проверяем аргументы каждого вызова
+  expect(apiService.request.calls.argsFor(0)).toEqual(['GET', '/users']);
+  expect(apiService.request.calls.argsFor(1)).toEqual(['POST', '/users', { name: 'John' }]);
+  expect(apiService.request.calls.argsFor(2)).toEqual(['GET', '/posts']);
+  
+  // Проверяем возвращаемые значения
+  expect(result1).toEqual({ status: 200, data: 'first' });
+  expect(result2).toEqual({ status: 201, data: 'second' });
+  expect(result3).toEqual({ status: 200, data: 'third' });
+  
+  // Проверяем через calls.returnValue
+  expect(apiService.request.calls.all()[0].returnValue).toEqual({ status: 200, data: 'first' });
+  expect(apiService.request.calls.all()[1].returnValue).toEqual({ status: 201, data: 'second' });
+});
+```
+
+#### Практический пример в Angular тесте
+```typescript
+describe('TodoComponent с детальной проверкой spy', () => {
+  let component: TodoComponent;
+  let todoService: jasmine.SpyObj<TodoService>;
+  
+  beforeEach(() => {
+    todoService = jasmine.createSpyObj('TodoService', ['addTodo', 'getTodos']);
+    component = new TodoComponent(todoService);
+  });
+  
+  it('должен вызывать addTodo с правильными аргументами', () => {
+    const mockTodo1 = { id: 1, title: 'Task 1', completed: false };
+    const mockTodo2 = { id: 2, title: 'Task 2', completed: false };
+    
+    todoService.addTodo.and.returnValues(
+      of(mockTodo1),
+      of(mockTodo2)
+    );
+    
+    // Добавляем две задачи
+    component.addTodo('Task 1');
+    component.addTodo('Task 2');
+    
+    // Проверяем, что метод был вызван 2 раза
+    expect(todoService.addTodo.calls.count()).toBe(2);
+    
+    // Проверяем аргументы каждого вызова
+    expect(todoService.addTodo.calls.argsFor(0)).toEqual(['Task 1']);
+    expect(todoService.addTodo.calls.argsFor(1)).toEqual(['Task 2']);
+    
+    // Альтернативный способ через args()
+    expect(todoService.addTodo.calls.args()).toEqual([
+      ['Task 1'],
+      ['Task 2']
+    ]);
+    
+    // Проверяем первый и последний вызов
+    expect(todoService.addTodo.calls.first().args).toEqual(['Task 1']);
+    expect(todoService.addTodo.calls.mostRecent().args).toEqual(['Task 2']);
+  });
+  
+  it('должен использовать identity для pass-through функции', () => {
+    const transformer = jasmine.createSpy('transform').and.identity();
+    
+    const data = { id: 1, value: 'test' };
+    const result = transformer(data);
+    
+    expect(result).toBe(data);
+    expect(transformer).toHaveBeenCalledOnceWith(data);
+  });
+});
 ```
 
 ### Хуки жизненного цикла
